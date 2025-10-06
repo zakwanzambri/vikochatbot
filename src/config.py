@@ -28,7 +28,7 @@ CHUNK_SIZE = 1000  # characters per chunk
 CHUNK_OVERLAP = 200  # overlap between chunks
 
 # Retrieval Configuration
-TOP_K_RESULTS = 5  # number of relevant chunks to retrieve
+TOP_K_RESULTS = 10  # number of relevant chunks to retrieve (increased for more context)
 
 # Vector Store Configuration
 VECTOR_STORE_TYPE = "faiss"  # Options: "faiss" or "chroma"
