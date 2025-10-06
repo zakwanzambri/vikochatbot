@@ -18,10 +18,18 @@ VECTOR_DB_DIR = DATA_DIR / "vector_db"
 UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
 VECTOR_DB_DIR.mkdir(parents=True, exist_ok=True)
 
+# AI Provider Selection
+AI_PROVIDER = os.getenv("AI_PROVIDER", "gemini")  # Options: "openai", "gemini"
+
 # OpenAI Configuration
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 EMBEDDING_MODEL = "text-embedding-3-small"
 CHAT_MODEL = "gpt-4o"  # or "gpt-4-turbo", "gpt-3.5-turbo"
+
+# Google Gemini Configuration (FREE!)
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+GEMINI_CHAT_MODEL = "gemini-1.5-flash"  # Fast and FREE! or "gemini-1.5-pro"
+GEMINI_EMBED_MODEL = "models/embedding-001"
 
 # Embedding Configuration
 CHUNK_SIZE = 1000  # characters per chunk
@@ -39,4 +47,14 @@ SUPPORTED_EXTENSIONS = [".pdf", ".doc", ".docx", ".txt"]
 
 # Error messages
 ERROR_NO_CONTEXT = "⚠️ I couldn't find that information in your documents."
-ERROR_NO_API_KEY = "⚠️ OpenAI API key not found. Please set OPENAI_API_KEY in your .env file."
+ERROR_NO_API_KEY = "⚠️ API key not found. Please set GOOGLE_API_KEY or OPENAI_API_KEY in your .env file."
+
+# Get active API key based on provider
+def get_active_api_key():
+    """Get the API key for the selected provider"""
+    if AI_PROVIDER == "gemini":
+        return GOOGLE_API_KEY
+    else:
+        return OPENAI_API_KEY
+
+ACTIVE_API_KEY = get_active_api_key()

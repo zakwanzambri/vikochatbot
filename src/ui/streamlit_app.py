@@ -13,9 +13,11 @@ from src.embedding import TextChunker, OpenAIEmbedder
 from src.vector_store import FAISSVectorStore, ChromaVectorStore
 from src.retrieval import DocumentRetriever
 from src.llm import ChatBot
+from src.llm.gemini_integration import GeminiEmbedder, GeminiChat
 from src.config import (
     UPLOADS_DIR, VECTOR_DB_DIR, CHUNK_SIZE, CHUNK_OVERLAP,
-    VECTOR_STORE_TYPE, COLLECTION_NAME, OPENAI_API_KEY, ERROR_NO_API_KEY
+    VECTOR_STORE_TYPE, COLLECTION_NAME, AI_PROVIDER,
+    OPENAI_API_KEY, GOOGLE_API_KEY, ACTIVE_API_KEY, ERROR_NO_API_KEY
 )
 import os
 import shutil
@@ -125,11 +127,20 @@ def main():
     st.markdown("Upload your documents (PDF, DOC, DOCX, TXT) and ask questions about their content!")
     
     # Check API key
-    if not OPENAI_API_KEY:
+    if not ACTIVE_API_KEY:
         st.error(ERROR_NO_API_KEY)
-        st.info("Please create a `.env` file in the project root and add your OpenAI API key.")
-        st.code("OPENAI_API_KEY=your_api_key_here")
+        st.info(f"Please create a `.env` file and add your API key.")
+        if AI_PROVIDER == "gemini":
+            st.code("GOOGLE_API_KEY=your_google_api_key_here")
+            st.info("Get your FREE Google API key: https://makersuite.google.com/app/apikey")
+        else:
+            st.code("OPENAI_API_KEY=your_openai_api_key_here")
         return
+    
+    # Show active AI provider
+    provider_emoji = "🟢" if AI_PROVIDER == "gemini" else "🔵"
+    provider_name = "Google Gemini (FREE!)" if AI_PROVIDER == "gemini" else "OpenAI"
+    st.sidebar.success(f"{provider_emoji} Using: **{provider_name}**")
     
     # Sidebar for document upload
     with st.sidebar:
@@ -264,7 +275,12 @@ def process_documents(uploaded_files):
         
         # Initialize components
         try:
-            embedder = OpenAIEmbedder()
+            # Use Gemini or OpenAI based on config
+            if AI_PROVIDER == "gemini":
+                embedder = GeminiEmbedder()
+            else:
+                embedder = OpenAIEmbedder()
+            
             chunker = TextChunker(chunk_size=CHUNK_SIZE, chunk_overlap=CHUNK_OVERLAP)
             vector_store, _ = load_or_create_vector_store()
             
@@ -317,7 +333,13 @@ def process_documents(uploaded_files):
                 # Initialize retriever and chatbot
                 st.session_state.vector_store = vector_store
                 st.session_state.retriever = DocumentRetriever(vector_store, embedder)
-                st.session_state.chatbot = ChatBot()
+                
+                # Use Gemini or OpenAI chatbot based on config
+                if AI_PROVIDER == "gemini":
+                    st.session_state.chatbot = GeminiChat()
+                else:
+                    st.session_state.chatbot = ChatBot()
+                
                 st.session_state.documents_loaded = True
                 
                 progress_bar.progress(1.0)
@@ -339,10 +361,21 @@ def load_existing_database():
         vector_store, has_data = load_or_create_vector_store()
         
         if has_data:
-            embedder = OpenAIEmbedder()
+            # Use Gemini or OpenAI based on config
+            if AI_PROVIDER == "gemini":
+                embedder = GeminiEmbedder()
+            else:
+                embedder = OpenAIEmbedder()
+            
             st.session_state.vector_store = vector_store
             st.session_state.retriever = DocumentRetriever(vector_store, embedder)
-            st.session_state.chatbot = ChatBot()
+            
+            # Use Gemini or OpenAI chatbot based on config
+            if AI_PROVIDER == "gemini":
+                st.session_state.chatbot = GeminiChat()
+            else:
+                st.session_state.chatbot = ChatBot()
+            
             st.session_state.documents_loaded = True
             
             stats = vector_store.get_stats()
