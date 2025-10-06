@@ -7,10 +7,10 @@ from typing import Dict
 
 
 class DOCXExtractor:
-    """Extract text from DOCX files"""
+    """Extract text from DOCX and DOC files"""
     
     def __init__(self):
-        self.supported_extension = '.docx'
+        self.supported_extensions = ['.docx', '.doc']
     
     def extract_text(self, file_path: str) -> Dict[str, any]:
         """
@@ -30,8 +30,8 @@ class DOCXExtractor:
         if not path.exists():
             raise FileNotFoundError(f"File not found: {file_path}")
         
-        if path.suffix.lower() != self.supported_extension:
-            raise ValueError(f"Invalid file type. Expected {self.supported_extension}, got {path.suffix}")
+        if path.suffix.lower() not in self.supported_extensions:
+            raise ValueError(f"Invalid file type. Expected {self.supported_extensions}, got {path.suffix}")
         
         try:
             doc = Document(file_path)

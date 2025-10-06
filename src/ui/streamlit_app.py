@@ -8,7 +8,7 @@ from pathlib import Path
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from src.document_processor import PDFExtractor, DOCXExtractor, TextExtractor
+from src.document_processor import PDFExtractor, DOCXExtractor, DOCExtractor, TextExtractor
 from src.embedding import TextChunker, OpenAIEmbedder
 from src.vector_store import FAISSVectorStore, ChromaVectorStore
 from src.retrieval import DocumentRetriever
@@ -77,6 +77,8 @@ def process_document(file, file_path: str):
             extractor = PDFExtractor()
         elif file_ext == '.docx':
             extractor = DOCXExtractor()
+        elif file_ext == '.doc':
+            extractor = DOCExtractor()
         elif file_ext == '.txt':
             extractor = TextExtractor()
         else:
@@ -120,7 +122,7 @@ def main():
     
     # Header
     st.markdown('<div class="main-header">📚 Document Q&A Chatbot</div>', unsafe_allow_html=True)
-    st.markdown("Upload your documents (PDF, DOCX, TXT) and ask questions about their content!")
+    st.markdown("Upload your documents (PDF, DOC, DOCX, TXT) and ask questions about their content!")
     
     # Check API key
     if not OPENAI_API_KEY:
@@ -135,10 +137,23 @@ def main():
         
         uploaded_files = st.file_uploader(
             "Upload Documents",
-            type=['pdf', 'docx', 'txt'],
+            type=['pdf', 'doc', 'docx', 'txt'],
             accept_multiple_files=True,
-            help="Upload PDF, DOCX, or TXT files"
+            help="Upload PDF, DOC, DOCX, or TXT files"
         )
+        
+        # Info about .doc file support
+        with st.expander("ℹ️ File Format Info"):
+            st.markdown("""
+            **Supported Formats:**
+            - ✅ **PDF** - Full support
+            - ✅ **DOCX** - Full support (modern Word)
+            - ⚠️ **DOC** - Limited support (legacy Word)
+            - ✅ **TXT** - Full support
+            
+            **Note:** Legacy .doc files may have extraction issues. 
+            For best results, convert .doc to .docx format.
+            """)
         
         if st.button("🔄 Process Documents", type="primary"):
             if not uploaded_files:

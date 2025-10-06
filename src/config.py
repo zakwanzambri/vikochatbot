@@ -35,7 +35,7 @@ VECTOR_STORE_TYPE = "faiss"  # Options: "faiss" or "chroma"
 COLLECTION_NAME = "documents"
 
 # Supported file types
-SUPPORTED_EXTENSIONS = [".pdf", ".docx", ".txt"]
+SUPPORTED_EXTENSIONS = [".pdf", ".doc", ".docx", ".txt"]
 
 # Error messages
 ERROR_NO_CONTEXT = "⚠️ I couldn't find that information in your documents."
